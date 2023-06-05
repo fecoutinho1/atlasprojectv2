@@ -1,0 +1,86 @@
+package main
+
+import (
+	"fmt"
+	"net"
+
+	"github.com/google/gopacket"
+	"github.com/google/gopacket/layers"
+)
+
+func scanPort(ipDestino string, porta int) bool {
+	endereco := fmt.Sprintf("%s:%d", ipDestino, porta)
+	_, err := net.Dial("tcp", endereco)
+
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+func enviarPacoteDisfarcado(ipDestino string) {
+	// Construindo o pacote disfarçado
+	pacote := gopacket.NewSerializeBuffer()
+	opcoes := gopacket.SerializeOptions{}
+
+	ip := layers.IPv4{
+		SrcIP:    net.ParseIP("192.168.0.1"), // IP de origem
+		DstIP:    net.ParseIP(ipDestino),     // IP de destino
+		Protocol: layers.IPProtocolTCP,
+	}
+
+	tcp := layers.TCP{
+		SrcPort: layers.TCPPort(1234), // Porta de origem
+		DstPort: layers.TCPPort(80),   // Porta de destino
+	}
+
+	tcp.SetNetworkLayerForChecksum(&ip)
+
+	// Adicionando os dados do pacote disfarçado
+	dados := []byte("b'\x18U\x08\xac\x07\xf7\x01?\x1bw2P\x00)\x05r\xaaa\x99py\x7f\x9f\xac\xd8\xfe\x07\xfc1\x12Q-'")
+	payload := gopacket.Payload(dados)
+
+	// Adicionando as camadas ao pacote
+	err := gopacket.SerializeLayers(pacote, opcoes,
+		&ip,
+		&tcp,
+		payload,
+	)
+
+	if err != nil {
+		fmt.Println("Erro ao construir o pacote disfarçado:", err)
+		return
+	}
+
+	// Enviando o pacote disfarçado
+	conn, err := net.Dial("ip4:tcp", ipDestino)
+	if err != nil {
+		fmt.Println("Erro ao enviar o pacote disfarçado:", err)
+		return
+	}
+	defer conn.Close()
+
+	_, err = conn.Write(pacote.Bytes())
+	if err != nil {
+		fmt.Println("Erro ao enviar o pacote disfarçado:", err)
+		return
+	}
+
+	fmt.Println("Pacote disfarçado enviado com sucesso para", ipDestino)
+}
+
+func main() {
+	ipDestino := "10.102.0.140"
+	portas := []int{22, 3306, 80, 443}
+
+	for _, porta := range portas {
+		if scanPort(ipDestino, porta) {
+			fmt.Println("Porta", porta, "aberta.")
+		} else {
+			fmt.Println("Porta", porta, "fechada.")
+		}
+	}
+
+	enviarPacoteDisfarcado(ipDestino)
+}
