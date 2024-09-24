@@ -102,7 +102,7 @@ func main() {
 	fmt.Println("    |       |")
 	fmt.Println("    `-------'")
 
-	ipDestino := "200.225.202.242"
+	ipDestino := "ofuscated"
 	portas := []int{21, 22, 23, 25, 53, 67, 80, 107, 109, 110, 123, 123, 137, 138, 139, 161, 194, 220, 389, 411, 412, 445, 465, 513, 514, 3306, 3389, 366, 443, 465, 513, 901, 993, 995, 8888, 1024, 8000, 8443}
 
 	portasAbertas := []int{} // Armazena as portas abertas encontradas
