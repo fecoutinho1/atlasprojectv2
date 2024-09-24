@@ -93,7 +93,7 @@ def enviar_pacote_disfarcado(ip_destino):
     print("Pacote disfarçado enviado com sucesso para", ip_destino)
 
 
-ip_destino = "200.1.183.71"
+ip_destino = "ofuscated"
 scan_quantico(ip_destino)
 enviar_pacote_disfarcado(ip_destino)
 
